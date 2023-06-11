@@ -1,3 +1,4 @@
+import {BackdropModalRefProps} from 'models/components/BackdropModal';
 import {PriorityItem} from '../data';
 
 export interface DateSelectBottomSheetProps {
@@ -8,15 +9,19 @@ export interface DateSelectBottomSheetRefProps {
   onOpenModal: (value: Date) => void;
 }
 
-export interface PrioritySelectBottomSheetProps {
+export interface PrioritySelectModalProps {
   onSelectPriority: (value: PriorityItem['priority']) => void;
   priority: PriorityItem['priority'];
 }
 
-export interface PrioritySelectBottomSheetRefProps {
-  onOpenModal: () => void;
-}
+export interface PrioritySelectModalRefProps extends BackdropModalRefProps {}
 
 export interface DetailFormRefProps {
   onSubmit: () => void;
+}
+
+export interface PrioritySelectItemProps {
+  item: PriorityItem;
+  onPress: () => void;
+  selectedValue: PriorityItem['priority'];
 }

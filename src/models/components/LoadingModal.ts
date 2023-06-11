@@ -1,3 +1,3 @@
-import {ModalRefProps} from './Modals';
+import {BackdropModalRefProps} from './BackdropModal';
 
-export interface LoadingModalRefProps extends ModalRefProps {}
+export interface LoadingModalRefProps extends BackdropModalRefProps {}

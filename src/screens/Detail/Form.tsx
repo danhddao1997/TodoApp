@@ -1,17 +1,18 @@
 import {yupResolver} from '@hookform/resolvers/yup';
 import {useNavigation} from '@react-navigation/native';
 import LoadingModal from 'components/modals/LoadingModal';
-import StatusSelectionModal from 'components/modals/StatusSelectionModal';
+import StatusSelectModal from 'components/modals/StatusSelectModal';
 import TextInputWithFocus from 'components/modifiers/TextInputWithFocus';
 import dayjs from 'dayjs';
-import {StatusSelectionModalRefProps} from 'models/components/StatusSelectionModal';
-import {ITodoItem, ReduxTodoItem, TodoForm} from 'models/data';
+import {StatusSelectModalRefProps} from 'models/components/StatusSelectModal';
+import {ReduxTodoItem, StatusItem, TodoForm} from 'models/data';
 import {DetailScreenNavigationProp} from 'models/navigation/screens/Detail';
 import {
   DateSelectBottomSheetRefProps,
   DetailFormRefProps,
-  PrioritySelectBottomSheetRefProps,
+  PrioritySelectModalRefProps,
 } from 'models/screens/Detail';
+import {mergeDeepLeft} from 'ramda';
 import React, {
   forwardRef,
   useCallback,
@@ -34,7 +35,7 @@ import {useRootSelector} from 'utils/hooks/redux';
 import {useRealm} from 'utils/realm';
 import * as yup from 'yup';
 import DateSelectBottomSheet from './DateSelectBottomSheet';
-import PrioritySelectBottomSheet from './PrioritySelectBottomSheet';
+import PrioritySelectModal from './PrioritySelectModal';
 
 const initialCreateValue: TodoForm = {
   title: '',
@@ -76,9 +77,8 @@ const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
   const realm = useRealm();
 
   const dateSelectBottomSheetRef = useRef<DateSelectBottomSheetRefProps>(null);
-  const prioritySelectBottomSheetRef =
-    useRef<PrioritySelectBottomSheetRefProps>(null);
-  const statusSelectionModalRef = useRef<StatusSelectionModalRefProps>(null);
+  const prioritySelectModalRef = useRef<PrioritySelectModalRefProps>(null);
+  const statusSelectionModalRef = useRef<StatusSelectModalRefProps>(null);
 
   const {control, handleSubmit, setValue} = useForm<TodoForm>({
     defaultValues: updatedData
@@ -88,7 +88,7 @@ const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
   });
 
   const onStatusSelect = useCallback(
-    (value: ITodoItem['status'] | undefined) => {
+    (value: StatusItem['status'] | undefined) => {
       setValue('status', value);
       statusSelectionModalRef.current?.setVisible(false);
     },
@@ -101,35 +101,30 @@ const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
 
   const onSubmit = (data: TodoForm) => {
     LoadingModal.setVisible(true);
-    if (type === 'create') {
-      const {title, description, priority, deadline} = data;
-      const createDate = new Date();
-      realm.write(() => {
-        realm.create('TodoItem', {
-          title: title.trim(),
-          description: description.trim(),
-          priority,
-          createdAt: createDate,
-          updatedAt: createDate,
-          deadline,
-          status: 0,
-        });
-      });
-    } else if (type === 'update' && updatedData) {
+    if (type !== 'update' || !!updatedData) {
       const {title, description, priority, deadline, status} = data;
-      const updateDate = new Date();
+      const date = new Date();
+      const additionalData =
+        type === 'create'
+          ? {
+              createdAt: date,
+              status: 0,
+            }
+          : {
+              id: BSON.ObjectID.createFromHexString(updatedData!.id),
+              status,
+            };
+      const saveData = mergeDeepLeft(additionalData, {
+        title: title.trim(),
+        description: description?.trim() || '',
+        priority,
+        deadline,
+        updatedAt: date,
+      });
       realm.write(() => {
         realm.create<TodoItem>(
           TodoItem.schema.name,
-          {
-            id: BSON.ObjectID.createFromHexString(updatedData.id),
-            title: title.trim(),
-            description: description.trim(),
-            priority,
-            updatedAt: updateDate,
-            deadline,
-            status,
-          },
+          saveData,
           UpdateMode.Modified,
         );
       });
@@ -187,7 +182,7 @@ const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
                   />
                   <Text style={styles.text}>{currentStatus.title}</Text>
                 </TouchableOpacity>
-                <StatusSelectionModal
+                <StatusSelectModal
                   selectedItem={value}
                   ref={statusSelectionModalRef}
                   hasAll={false}
@@ -256,7 +251,7 @@ const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
             )!;
 
             const onOpenModal = () =>
-              prioritySelectBottomSheetRef.current?.onOpenModal();
+              prioritySelectModalRef.current?.setVisible(true);
 
             return (
               <>
@@ -273,8 +268,8 @@ const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
                   />
                   <Text style={styles.text}>{currentPriority.title}</Text>
                 </TouchableOpacity>
-                <PrioritySelectBottomSheet
-                  ref={prioritySelectBottomSheetRef}
+                <PrioritySelectModal
+                  ref={prioritySelectModalRef}
                   onSelectPriority={onChange}
                   priority={value}
                 />

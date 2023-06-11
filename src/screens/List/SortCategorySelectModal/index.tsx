@@ -1,67 +1,34 @@
-import {setSortCategory} from 'appRedux/stores/List';
-import {
-  SortCategorySelectionItemProps,
-  SortCategorySelectModalRefProps,
-} from 'models/screens/List';
-import {equals, keys} from 'ramda';
+import BackdropModal from 'components/modals/BackdropModal';
+import {BackdropModalRefProps} from 'models/components/BackdropModal';
+import {SortCategorySelectModalRefProps} from 'models/screens/List';
+import {keys} from 'ramda';
 import React, {
   forwardRef,
-  memo,
   useCallback,
   useImperativeHandle,
   useMemo,
-  useState,
+  useRef,
 } from 'react';
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import {FlatList, StyleSheet, Text} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {SORT_CATEGORY_TITLE_MAPPING} from 'utils/constants';
-import {useRootDispatch, useRootSelector} from 'utils/hooks/redux';
+import SortCategorySelectItem from './SortCategorySelectItem';
 
 const filterCategories = keys(SORT_CATEGORY_TITLE_MAPPING) as string[];
 
-const CategoryItem = memo(
-  ({category, onCloseModal}: SortCategorySelectionItemProps) => {
-    const sortCategory = useRootSelector(state => state.list.sortCategory);
-    const dispatch = useRootDispatch();
-
-    const isSelected = sortCategory === category;
-
-    const onPress = () => {
-      dispatch(setSortCategory(category));
-      onCloseModal();
-    };
-
-    return (
-      <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
-        <Text style={styles.left}>{SORT_CATEGORY_TITLE_MAPPING[category]}</Text>
-        <MaterialIcon
-          name="check"
-          size={24}
-          color={isSelected ? 'tomato' : 'transparent'}
-        />
-      </TouchableOpacity>
-    );
-  },
-  (prev, curr) => equals(prev, curr),
-);
-
 const SortCategorySelectModal = forwardRef<SortCategorySelectModalRefProps, {}>(
   (_, ref) => {
-    const [visible, setVisible] = useState(false);
-
     const {bottom, left, right} = useSafeAreaInsets();
+
+    const backdropModalRef = useRef<BackdropModalRefProps>(null);
+
+    const setVisible = useCallback((value: boolean) => {
+      backdropModalRef.current?.setVisible(value);
+    }, []);
 
     const onCloseModal = useCallback(() => {
       setVisible(false);
-    }, []);
+    }, [setVisible]);
 
     useImperativeHandle(ref, () => {
       return {
@@ -76,7 +43,9 @@ const SortCategorySelectModal = forwardRef<SortCategorySelectModalRefProps, {}>(
 
     const renderItem = useCallback(
       ({item}: {item: string}) => {
-        return <CategoryItem category={item} onCloseModal={onCloseModal} />;
+        return (
+          <SortCategorySelectItem category={item} onCloseModal={onCloseModal} />
+        );
       },
       [onCloseModal],
     );
@@ -84,11 +53,7 @@ const SortCategorySelectModal = forwardRef<SortCategorySelectModalRefProps, {}>(
     const keyExtractor = useCallback((item: string) => item, []);
 
     return (
-      <Modal animationType="slide" transparent visible={visible}>
-        <Pressable
-          style={[StyleSheet.absoluteFill, styles.background]}
-          onPress={onCloseModal}
-        />
+      <BackdropModal ref={backdropModalRef} onCloseModal={onCloseModal}>
         <FlatList
           data={filterCategories}
           keyExtractor={keyExtractor}
@@ -102,7 +67,7 @@ const SortCategorySelectModal = forwardRef<SortCategorySelectModalRefProps, {}>(
           renderItem={renderItem}
           ListHeaderComponent={ListHeader}
         />
-      </Modal>
+      </BackdropModal>
     );
   },
 );

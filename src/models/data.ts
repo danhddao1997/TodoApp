@@ -11,33 +11,30 @@ export interface ITodoItem {
   status: number;
 }
 
-export interface ReduxTodoItem {
+export interface ReduxTodoItem
+  extends Omit<ITodoItem, 'id' | 'createdAt' | 'updatedAt' | 'deadline'> {
   id: string;
-  title: string;
-  description?: string;
-  priority: number;
   createdAt: number;
   updatedAt: number;
   deadline: number;
-  status: number;
 }
 
 export interface StatusItem {
   title: string;
-  status: number;
+  status: ITodoItem['status'];
   color: string;
 }
 
 export interface PriorityItem {
   title: string;
-  priority: number;
+  priority: ITodoItem['priority'];
   color: string;
 }
 
 export interface TodoForm {
-  title: string;
-  description: string;
-  priority: number;
-  deadline: Date;
-  status?: number;
+  title: ITodoItem['title'];
+  description: ITodoItem['description'];
+  priority: ITodoItem['priority'];
+  deadline: ITodoItem['deadline'];
+  status?: ITodoItem['status'];
 }

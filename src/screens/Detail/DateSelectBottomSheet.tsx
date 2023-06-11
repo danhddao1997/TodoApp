@@ -1,7 +1,9 @@
 import DateTimePicker, {
   DateTimePickerAndroid,
 } from '@react-native-community/datetimepicker';
+import BackdropModal from 'components/modals/BackdropModal';
 import dayjs from 'dayjs';
+import {BackdropModalRefProps} from 'models/components/BackdropModal';
 import {
   DateSelectBottomSheetProps,
   DateSelectBottomSheetRefProps,
@@ -10,16 +12,10 @@ import React, {
   forwardRef,
   useCallback,
   useImperativeHandle,
+  useRef,
   useState,
 } from 'react';
-import {
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {isIOS} from 'utils/constants';
 
@@ -28,9 +24,14 @@ const DateSelectBottomSheet = forwardRef<
   DateSelectBottomSheetProps
 >(({onUpdateDate}, ref) => {
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [visible, setVisible] = useState(false);
 
   const {left, right} = useSafeAreaInsets();
+
+  const backdropModalRef = useRef<BackdropModalRefProps>(null);
+
+  const setVisible = useCallback((value: boolean) => {
+    backdropModalRef.current?.setVisible(value);
+  }, []);
 
   const onOpenDateModal = useCallback(
     (value: Date) => {
@@ -52,18 +53,18 @@ const DateSelectBottomSheet = forwardRef<
         });
       }
     },
-    [onUpdateDate],
+    [onUpdateDate, setVisible],
   );
+
+  const onPressCloseModal = useCallback(() => {
+    setVisible(false);
+  }, [setVisible]);
 
   useImperativeHandle(ref, () => {
     return {
       onOpenModal: onOpenDateModal,
     };
   });
-
-  const onCloseModal = useCallback(() => {
-    setVisible(false);
-  }, []);
 
   const onChangeDate = useCallback((_: any, date?: Date) => {
     setSelectedDate(date);
@@ -72,14 +73,10 @@ const DateSelectBottomSheet = forwardRef<
   const onChooseDate = useCallback(() => {
     onUpdateDate(selectedDate!);
     setVisible(false);
-  }, [onUpdateDate, selectedDate]);
+  }, [onUpdateDate, selectedDate, setVisible]);
 
-  return (
-    <Modal animationType="slide" transparent visible={visible}>
-      <Pressable
-        style={[StyleSheet.absoluteFill, styles.background]}
-        onPress={onCloseModal}
-      />
+  return isIOS ? (
+    <BackdropModal ref={backdropModalRef} onCloseModal={onPressCloseModal}>
       <View
         style={[styles.container, {paddingLeft: left, paddingRight: right}]}>
         <View style={styles.headerContainer}>
@@ -98,8 +95,8 @@ const DateSelectBottomSheet = forwardRef<
           display="spinner"
         />
       </View>
-    </Modal>
-  );
+    </BackdropModal>
+  ) : null;
 });
 
 export default DateSelectBottomSheet;

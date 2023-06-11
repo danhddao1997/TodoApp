@@ -4,9 +4,9 @@ import {
   setShowFilterStatusModal,
   setUpdatedData,
 } from 'appRedux/stores/List';
-import StatusSelectionModal from 'components/modals/StatusSelectionModal';
-import {StatusSelectionModalRefProps} from 'models/components/StatusSelectionModal';
-import {ITodoItem, StatusItem} from 'models/data';
+import StatusSelectModal from 'components/modals/StatusSelectModal';
+import {StatusSelectModalRefProps} from 'models/components/StatusSelectModal';
+import {StatusItem} from 'models/data';
 import {find, propEq} from 'ramda';
 import React, {useCallback, useEffect, useRef} from 'react';
 import {StyleSheet, Text, TouchableOpacity} from 'react-native';
@@ -17,7 +17,7 @@ import {useRootDispatch, useRootSelector} from 'utils/hooks/redux';
 import {useRealm} from 'utils/realm';
 
 const FilterStatusSelect = () => {
-  const statusSelectionModalRef = useRef<StatusSelectionModalRefProps>(null);
+  const statusSelectionModalRef = useRef<StatusSelectModalRefProps>(null);
 
   const filterStatus = useRootSelector(state => state.list.filterStatus);
   const isQuery = useRootSelector(state => state.list.isQuery);
@@ -40,7 +40,7 @@ const FilterStatusSelect = () => {
   }, [dispatch]);
 
   const onStatusSelect = useCallback(
-    (value?: ITodoItem['status']) => {
+    (value?: StatusItem['status']) => {
       if (isQuery) {
         dispatch(setFilterStatus(value));
       } else {
@@ -82,7 +82,7 @@ const FilterStatusSelect = () => {
         onPress={onPressOpenModal}>
         <Text style={styles.title}>{currentStatusData?.title || 'All'}</Text>
       </TouchableOpacity>
-      <StatusSelectionModal
+      <StatusSelectModal
         selectedItem={isQuery ? filterStatus : updatedData?.status}
         ref={statusSelectionModalRef}
         hasAll={isQuery}

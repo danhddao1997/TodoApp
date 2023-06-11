@@ -1,39 +1,27 @@
+import {BackdropModalRefProps} from 'models/components/BackdropModal';
 import {
-  StatusSelectionModalProps,
-  StatusSelectionModalRefProps,
-} from 'models/components/StatusSelectionModal';
+  StatusSelectModalProps,
+  StatusSelectModalRefProps,
+} from 'models/components/StatusSelectModal';
 import {StatusItem} from 'models/data';
 import React, {
   forwardRef,
   useCallback,
   useImperativeHandle,
   useMemo,
-  useState,
+  useRef,
 } from 'react';
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {FlatList, StyleSheet, Text} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {STATUS_LIST} from 'utils/constants';
+import BackdropModal from '../BackdropModal';
+import StatusSelectItem from './StatusSelectItem';
 
-const CategorySelectionModal = forwardRef<
-  StatusSelectionModalRefProps,
-  StatusSelectionModalProps
+const StatusSelectModal = forwardRef<
+  StatusSelectModalRefProps,
+  StatusSelectModalProps
 >(({hasAll, selectedItem, onItemSelect, onCloseModal}, ref) => {
-  const [visible, setVisible] = useState(false);
-
-  useImperativeHandle(ref, () => {
-    return {
-      setVisible,
-    };
-  });
+  const backdropModalRef = useRef<BackdropModalRefProps>(null);
 
   const {bottom, left, right} = useSafeAreaInsets();
 
@@ -41,34 +29,29 @@ const CategorySelectionModal = forwardRef<
     return hasAll ? ['All', ...STATUS_LIST] : STATUS_LIST;
   }, [hasAll]);
 
+  const setVisible = useCallback((value: boolean) => {
+    backdropModalRef.current?.setVisible(value);
+  }, []);
+
+  useImperativeHandle(ref, () => {
+    return {
+      setVisible,
+    };
+  });
+
   const onPressCloseModal = useCallback(() => {
     setVisible(false);
     onCloseModal?.();
-  }, [onCloseModal]);
+  }, [onCloseModal, setVisible]);
 
   const renderItem = useCallback(
     ({item}: {item: string | StatusItem}) => {
-      const isAll = typeof item === 'string';
-      const iStatus = isAll ? undefined : item.status;
-
-      const onPress = () => onItemSelect(iStatus);
-
-      const isSelected = selectedItem === iStatus;
-
-      const color = isAll ? '#455A64' : item.color;
-
       return (
-        <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
-          <View style={styles.left}>
-            <View style={[styles.circle, {backgroundColor: color}]} />
-            <Text style={styles.title}>{isAll ? 'All' : item.title}</Text>
-          </View>
-          <MaterialIcon
-            name="check"
-            size={24}
-            color={isSelected ? 'tomato' : 'transparent'}
-          />
-        </TouchableOpacity>
+        <StatusSelectItem
+          item={item}
+          onItemSelect={onItemSelect}
+          selectedItem={selectedItem}
+        />
       );
     },
     [onItemSelect, selectedItem],
@@ -80,11 +63,7 @@ const CategorySelectionModal = forwardRef<
   );
 
   return (
-    <Modal animationType="slide" visible={visible} transparent>
-      <Pressable
-        style={[StyleSheet.absoluteFill, styles.background]}
-        onPress={onPressCloseModal}
-      />
+    <BackdropModal ref={backdropModalRef} onCloseModal={onPressCloseModal}>
       <FlatList
         data={listData}
         style={styles.list}
@@ -97,11 +76,11 @@ const CategorySelectionModal = forwardRef<
         renderItem={renderItem}
         ListHeaderComponent={ListHeader}
       />
-    </Modal>
+    </BackdropModal>
   );
 });
 
-export default CategorySelectionModal;
+export default StatusSelectModal;
 
 const styles = StyleSheet.create({
   background: {

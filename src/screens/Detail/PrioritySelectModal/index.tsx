@@ -1,49 +1,43 @@
+import BackdropModal from 'components/modals/BackdropModal';
+import {BackdropModalRefProps} from 'models/components/BackdropModal';
 import {PriorityItem} from 'models/data';
 import {
-  PrioritySelectBottomSheetProps,
-  PrioritySelectBottomSheetRefProps,
+  PrioritySelectModalProps,
+  PrioritySelectModalRefProps,
 } from 'models/screens/Detail';
 import React, {
   forwardRef,
   useCallback,
   useImperativeHandle,
   useMemo,
-  useState,
+  useRef,
 } from 'react';
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {FlatList, StyleSheet, Text} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import {PRIORITY_LIST} from 'utils/constants';
+import PrioritySelectItem from './PrioritySelectItem';
 
-const PrioritySelectBottomSheet = forwardRef<
-  PrioritySelectBottomSheetRefProps,
-  PrioritySelectBottomSheetProps
+const PrioritySelectModal = forwardRef<
+  PrioritySelectModalRefProps,
+  PrioritySelectModalProps
 >(({onSelectPriority, priority}, ref) => {
-  const [visible, setVisible] = useState(false);
-
   const {bottom, left, right} = useSafeAreaInsets();
 
-  const onOpenModal = useCallback(() => {
-    setVisible(true);
-  }, []);
+  const backdropModalRef = useRef<BackdropModalRefProps>(null);
 
-  useImperativeHandle(ref, () => {
-    return {
-      onOpenModal,
-    };
-  });
+  const setVisible = useCallback((value: boolean) => {
+    backdropModalRef.current?.setVisible(value);
+  }, []);
 
   const onCloseModal = useCallback(() => {
     setVisible(false);
-  }, []);
+  }, [setVisible]);
+
+  useImperativeHandle(ref, () => {
+    return {
+      setVisible,
+    };
+  });
 
   const renderItem = useCallback(
     ({item}: {item: PriorityItem}) => {
@@ -52,23 +46,15 @@ const PrioritySelectBottomSheet = forwardRef<
         setTimeout(() => setVisible(false), 75);
       };
 
-      const selected = priority === item.priority;
-
       return (
-        <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
-          <View style={styles.left}>
-            <View style={[styles.circle, {backgroundColor: item.color}]} />
-            <Text style={styles.title}>{item.title}</Text>
-          </View>
-          <MaterialIcon
-            name="check"
-            size={24}
-            color={selected ? 'tomato' : 'transparent'}
-          />
-        </TouchableOpacity>
+        <PrioritySelectItem
+          selectedValue={priority}
+          onPress={onPress}
+          item={item}
+        />
       );
     },
-    [onSelectPriority, priority],
+    [onSelectPriority, priority, setVisible],
   );
 
   const ListHeader = useMemo(
@@ -77,11 +63,7 @@ const PrioritySelectBottomSheet = forwardRef<
   );
 
   return (
-    <Modal animationType="slide" transparent visible={visible}>
-      <Pressable
-        style={[StyleSheet.absoluteFill, styles.background]}
-        onPress={onCloseModal}
-      />
+    <BackdropModal ref={backdropModalRef} onCloseModal={onCloseModal}>
       <FlatList
         data={PRIORITY_LIST}
         style={styles.list}
@@ -94,11 +76,11 @@ const PrioritySelectBottomSheet = forwardRef<
         renderItem={renderItem}
         ListHeaderComponent={ListHeader}
       />
-    </Modal>
+    </BackdropModal>
   );
 });
 
-export default PrioritySelectBottomSheet;
+export default PrioritySelectModal;
 
 const styles = StyleSheet.create({
   background: {
