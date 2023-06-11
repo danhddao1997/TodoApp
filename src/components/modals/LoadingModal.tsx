@@ -2,6 +2,7 @@ import {LoadingModalRefProps} from 'models/components/LoadingModal';
 import React, {
   createRef,
   forwardRef,
+  ForwardRefRenderFunction,
   useImperativeHandle,
   useState,
 } from 'react';
@@ -9,7 +10,10 @@ import {ActivityIndicator, Modal, StyleSheet, View} from 'react-native';
 
 const loadingModalRef = createRef<LoadingModalRefProps>();
 
-const LoadingModalComponent = forwardRef<LoadingModalRefProps, {}>((_, ref) => {
+const ForwardedComponent: ForwardRefRenderFunction<LoadingModalRefProps, {}> = (
+  _,
+  ref,
+) => {
   const [visible, setVisible] = useState(false);
 
   useImperativeHandle(ref, () => {
@@ -25,7 +29,11 @@ const LoadingModalComponent = forwardRef<LoadingModalRefProps, {}>((_, ref) => {
       </View>
     </Modal>
   );
-});
+};
+
+const LoadingModalComponent = forwardRef<LoadingModalRefProps, {}>(
+  ForwardedComponent,
+);
 
 const LoadingModal = () => {
   return <LoadingModalComponent ref={loadingModalRef} />;

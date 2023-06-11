@@ -6,6 +6,7 @@ import {
 import {StatusItem} from 'models/data';
 import React, {
   forwardRef,
+  ForwardRefRenderFunction,
   useCallback,
   useImperativeHandle,
   useMemo,
@@ -17,10 +18,10 @@ import {STATUS_LIST} from 'utils/constants';
 import BackdropModal from '../BackdropModal';
 import StatusSelectItem from './StatusSelectItem';
 
-const StatusSelectModal = forwardRef<
+const ForwardedComponent: ForwardRefRenderFunction<
   StatusSelectModalRefProps,
   StatusSelectModalProps
->(({hasAll, selectedItem, onItemSelect, onCloseModal}, ref) => {
+> = ({hasAll, selectedItem, onItemSelect, onCloseModal}, ref) => {
   const backdropModalRef = useRef<BackdropModalRefProps>(null);
 
   const {bottom, left, right} = useSafeAreaInsets();
@@ -78,33 +79,20 @@ const StatusSelectModal = forwardRef<
       />
     </BackdropModal>
   );
-});
+};
+
+const StatusSelectModal = forwardRef<
+  StatusSelectModalRefProps,
+  StatusSelectModalProps
+>(ForwardedComponent);
 
 export default StatusSelectModal;
 
 const styles = StyleSheet.create({
-  background: {
-    zIndex: -1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
   list: {
     flexGrow: 0,
     marginTop: 'auto',
     backgroundColor: '#fff',
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
-  circle: {
-    width: 16,
-    aspectRatio: 1,
-    borderRadius: 99,
-    marginRight: 8,
-  },
-  title: {
-    fontSize: 16,
   },
   listHeaderTitle: {
     textAlign: 'center',
@@ -121,11 +109,5 @@ const styles = StyleSheet.create({
     shadowRadius: 1.0,
 
     elevation: 1,
-  },
-  left: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 8,
   },
 });

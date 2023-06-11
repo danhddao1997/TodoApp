@@ -15,6 +15,7 @@ import {
 import {mergeDeepLeft} from 'ramda';
 import React, {
   forwardRef,
+  ForwardRefRenderFunction,
   useCallback,
   useImperativeHandle,
   useRef,
@@ -68,7 +69,10 @@ const convertDataToFormValue = (data: ReduxTodoItem) => {
   };
 };
 
-const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
+const ForwardedComponent: ForwardRefRenderFunction<DetailFormRefProps, {}> = (
+  _,
+  ref,
+) => {
   const {goBack} = useNavigation<DetailScreenNavigationProp['navigation']>();
 
   const updatedData = useRootSelector(state => state.list.updatedData);
@@ -308,7 +312,9 @@ const DetailForm = forwardRef<DetailFormRefProps, {}>((_, ref) => {
       />
     </>
   );
-});
+};
+
+const DetailForm = forwardRef<DetailFormRefProps, {}>(ForwardedComponent);
 
 export default DetailForm;
 

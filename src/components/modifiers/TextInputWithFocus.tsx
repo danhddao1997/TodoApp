@@ -34,7 +34,7 @@ const TextInputWithFocus: FC<
       paddingHorizontal: 0,
       paddingTop: 0,
       paddingBottom: 0,
-      ...(props.multiline ? {height: '100%'} : {}),
+      ...(props.multiline ? styles.multiline : {}),
       ...(props.style as Record<string, unknown>),
     },
   } as TextInputProps) as TextInputProps;

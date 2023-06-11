@@ -10,6 +10,7 @@ import {
 } from 'models/screens/Detail';
 import React, {
   forwardRef,
+  ForwardRefRenderFunction,
   useCallback,
   useImperativeHandle,
   useRef,
@@ -19,10 +20,10 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {isIOS} from 'utils/constants';
 
-const DateSelectBottomSheet = forwardRef<
+const ForwardedComponent: ForwardRefRenderFunction<
   DateSelectBottomSheetRefProps,
   DateSelectBottomSheetProps
->(({onUpdateDate}, ref) => {
+> = ({onUpdateDate}, ref) => {
   const [selectedDate, setSelectedDate] = useState<Date>();
 
   const {left, right} = useSafeAreaInsets();
@@ -97,7 +98,12 @@ const DateSelectBottomSheet = forwardRef<
       </View>
     </BackdropModal>
   ) : null;
-});
+};
+
+const DateSelectBottomSheet = forwardRef<
+  DateSelectBottomSheetRefProps,
+  DateSelectBottomSheetProps
+>(ForwardedComponent);
 
 export default DateSelectBottomSheet;
 

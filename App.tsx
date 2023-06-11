@@ -1,10 +1,10 @@
-import React from 'react';
-import AppNavigation from 'navigation';
-import {RealmProvider} from 'utils/realm';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import LoadingModal from 'components/modals/LoadingModal';
-import {Provider} from 'react-redux';
 import store from 'appRedux';
+import LoadingModal from 'components/modals/LoadingModal';
+import AppNavigation from 'navigation';
+import React from 'react';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {Provider} from 'react-redux';
+import {RealmProvider} from 'utils/realm';
 
 const App = () => {
   return (

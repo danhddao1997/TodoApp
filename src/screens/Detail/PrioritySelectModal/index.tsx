@@ -7,6 +7,7 @@ import {
 } from 'models/screens/Detail';
 import React, {
   forwardRef,
+  ForwardRefRenderFunction,
   useCallback,
   useImperativeHandle,
   useMemo,
@@ -17,10 +18,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {PRIORITY_LIST} from 'utils/constants';
 import PrioritySelectItem from './PrioritySelectItem';
 
-const PrioritySelectModal = forwardRef<
+const ForwardedComponent: ForwardRefRenderFunction<
   PrioritySelectModalRefProps,
   PrioritySelectModalProps
->(({onSelectPriority, priority}, ref) => {
+> = ({onSelectPriority, priority}, ref) => {
   const {bottom, left, right} = useSafeAreaInsets();
 
   const backdropModalRef = useRef<BackdropModalRefProps>(null);
@@ -78,33 +79,20 @@ const PrioritySelectModal = forwardRef<
       />
     </BackdropModal>
   );
-});
+};
+
+const PrioritySelectModal = forwardRef<
+  PrioritySelectModalRefProps,
+  PrioritySelectModalProps
+>(ForwardedComponent);
 
 export default PrioritySelectModal;
 
 const styles = StyleSheet.create({
-  background: {
-    zIndex: -1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
   list: {
     flexGrow: 0,
     marginTop: 'auto',
     backgroundColor: '#fff',
-  },
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
-  circle: {
-    width: 16,
-    aspectRatio: 1,
-    borderRadius: 99,
-    marginRight: 8,
-  },
-  title: {
-    fontSize: 16,
   },
   listHeaderTitle: {
     textAlign: 'center',
@@ -121,11 +109,5 @@ const styles = StyleSheet.create({
     shadowRadius: 1.0,
 
     elevation: 1,
-  },
-  left: {
-    flex: 1,
-    marginRight: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });

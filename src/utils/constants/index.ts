@@ -28,8 +28,8 @@ export const PRIORITY_LIST: PriorityItem[] = [
 export const SORT_CATEGORY_TITLE_MAPPING: {[key: string]: string} = {
   title: 'Title',
   priority: 'Priority',
-  createdAt: 'Create date',
-  updatedAt: 'Update date',
+  createdAt: 'Create time',
+  updatedAt: 'Update time',
   deadline: 'Deadline',
 };
 
