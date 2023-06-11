@@ -76,7 +76,7 @@ const FilterStatusSelect = () => {
       <TouchableOpacity
         style={[
           styles.titleContainer,
-          {borderColor: currentStatusData?.color ?? '#000'},
+          {borderColor: currentStatusData?.color ?? '#455A64'},
         ]}
         activeOpacity={0.8}
         onPress={onPressOpenModal}>

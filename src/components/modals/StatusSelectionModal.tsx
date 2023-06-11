@@ -55,16 +55,12 @@ const CategorySelectionModal = forwardRef<
 
       const isSelected = selectedItem === iStatus;
 
+      const color = isAll ? '#455A64' : item.color;
+
       return (
         <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
           <View style={styles.left}>
-            <View
-              style={[
-                styles.circle,
-                // eslint-disable-next-line react-native/no-inline-styles
-                {backgroundColor: isAll ? '#000' : item.color},
-              ]}
-            />
+            <View style={[styles.circle, {backgroundColor: color}]} />
             <Text style={styles.title}>{isAll ? 'All' : item.title}</Text>
           </View>
           <MaterialIcon

@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   },
   empty: {
     textAlign: 'center',
+    fontSize: 16,
   },
   contentContainer: {
     padding: 16,
